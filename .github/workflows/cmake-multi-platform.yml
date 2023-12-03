@@ -4,6 +4,7 @@ name: CMake on multiple platforms
 
 env:
   QT_VERSION: "6.6.0"
+  PLUGIN_NAME: AdventOfCode
   
 on:
   push:
@@ -57,19 +58,19 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
     - name: Install Qt Windows
-      if: startsWith(matrix.config.os, 'windows')
+      if: startsWith(matrix.os, 'windows')
       uses: jurplel/install-qt-action@v2
       with:
-          host: ${{ matrix.config.host }}
+          host: ${{ matrix.host }}
           version: ${{ env.QT_VERSION }}
           arch: ${{ env.MINGW_VERSION }}
           extra: --external 7z
 
     - name: Install Qt Ubuntu
-      if: (!startsWith(matrix.config.os, 'windows'))
+      if: (!startsWith(matrix.os, 'windows'))
       uses: jurplel/install-qt-action@v2
       with:
-          host: ${{ matrix.config.host }}
+          host: ${{ matrix.host }}
           version: ${{ env.QT_VERSION }}
           extra: --external 7z
 
@@ -86,6 +87,12 @@ jobs:
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+    - name: upload artifact release
+      uses: actions/upload-artifact@v3
+      with:
+          path: ./
+          name: ${{ env.PLUGIN_NAME}}-${{ matrix.os }}.zip
 
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
