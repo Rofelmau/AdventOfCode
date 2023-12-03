@@ -2,6 +2,9 @@
 # See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
 name: CMake on multiple platforms
 
+env:
+  QT_VERSION: "6.6.0"
+  
 on:
   push:
     branches-ignore:
@@ -62,6 +65,23 @@ jobs:
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
+
+    - name: Install Qt Windows
+      if: startsWith(matrix.config.os, 'windows')
+      uses: jurplel/install-qt-action@v2
+      with:
+          host: ${{ matrix.config.host }}
+          version: ${{ env.QT_VERSION }}
+          arch: ${{ env.MINGW_VERSION }}
+          extra: --external 7z
+
+    - name: Install Qt Ubuntu
+      if: (!startsWith(matrix.config.os, 'windows'))
+      uses: jurplel/install-qt-action@v2
+      with:
+          host: ${{ matrix.config.host }}
+          version: ${{ env.QT_VERSION }}
+          extra: --external 7z
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
