@@ -72,6 +72,7 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2019_64'
+        tools: 'tools_ninja'
 
     - name: Install Qt For Ubuntu
       if: startsWith(matrix.os, 'ubuntu')
@@ -82,6 +83,7 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'gcc_64'
+        tools: 'tools_ninja'
 
     - name: Install Qt for MacOS
       if: startsWith(matrix.os, 'macos')
@@ -92,26 +94,51 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
+        tools: 'tools_ninja'
 
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: >
-        cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -S ${{ github.workspace }}
-
+    - name: Configure
+      shell: bash
+      run: |
+          mkdir build
+          mkdir instdir
+          cmake \
+            -S . \
+            -B . \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -G "Ninja" \
+            -DCMAKE_INSTALL_PREFIX:PATH=instdir
+    
     - name: Build
-      # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
-
-    - name: upload artifact release
-      uses: actions/upload-artifact@v3
+      shell: bash
+      run: cmake --build . --config ${{ matrix.build_type }}
+    
+    - name: Install Strip
+      shell: bash
+      run: cmake --install . --strip
+    
+    - name: Pack
+      shell: bash
+      working-directory: instdir
+      run: |
+          ls -laR
+          7z a ../${{ matrix.os }} .
+      
+    - name: Upload
+      uses: actions/upload-artifact@v1
       with:
-          path: ./
-          name: ${{ env.PLUGIN_NAME}}-${{ matrix.os }}.zip
+        path: ./${{ matrix.os }}
+        name: ${{ matrix.os }}
+    
+    - name: Upload release asset
+      if: github.event_name == 'release' && (github.event.action == 'published' || github.event.action == 'created')
+      uses: actions/upload-release-asset@v3
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./${{ matrix.os }}
+        asset_name: ${{ matrix.os }}.zip
+        asset_content_type: application/zip
 
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
