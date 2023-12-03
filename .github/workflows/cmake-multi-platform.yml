@@ -124,14 +124,12 @@ jobs:
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
     
     - name: Install Strip
-      shell: bash
       run: cmake --install ${{ steps.strings.outputs.build-output-dir }} --strip
     
     - name: Pack
-      shell: bash
       run: |
           ls -laR
-          7z a ../${{ matrix.os }}.7z ${{ steps.strings.outputs.build-output-dir }}
+          7z a ${{ matrix.os }}.7z ${{ steps.strings.outputs.build-output-dir }}
       
     - name: Upload
       uses: actions/upload-artifact@v3
