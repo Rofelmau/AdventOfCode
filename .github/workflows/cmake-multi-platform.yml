@@ -63,22 +63,35 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: Install Qt Windows
+    - name: Install Qt for Windows
       if: startsWith(matrix.os, 'windows')
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
-          host: ${{ matrix.host }}
-          version: ${{ env.QT_VERSION }}
-          arch: ${{ env.MINGW_VERSION }}
-          extra: --external 7z
+        aqtversion: '==3.1.*'
+        version: ${{ env.QT_VERSION }}
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
 
-    - name: Install Qt Ubuntu
-      if: (!startsWith(matrix.os, 'windows'))
-      uses: jurplel/install-qt-action@v2
+    - name: Install Qt For Ubuntu
+      if: startsWith(matrix.os, 'ubuntu')
+      uses: jurplel/install-qt-action@v3
       with:
-          host: ${{ matrix.host }}
-          version: ${{ env.QT_VERSION }}
-          extra: --external 7z
+        aqtversion: '==3.1.*'
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'desktop'
+        arch: 'gcc_64'
+
+    - name: Install Qt for MacOS
+      if: startsWith(matrix.os, 'macos')
+      uses: jurplel/install-qt-action@v3
+      with:
+        aqtversion: '==3.1.*'
+        version: ${{ env.QT_VERSION }}
+        host: 'mac'
+        target: 'desktop'
+        arch: 'clang_64'
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
