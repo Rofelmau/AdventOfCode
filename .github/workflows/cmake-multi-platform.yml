@@ -94,14 +94,14 @@ jobs:
         arch: 'clang_64'
         
     - name: Install dependencies on windows
-      if: startsWith(matrix.config.os, 'windows')
+      if: startsWith(matrix.os, 'windows')
       run: |
           choco install ninja
           ninja --version
           cmake --version
           
     - name: Install dependencies on ubuntu
-      if: startsWith(matrix.config.name, 'ubuntu')
+      if: startsWith(matrix.os, 'ubuntu')
       run: |
           sudo apt-get update
           sudo apt-get install ninja-build
@@ -110,7 +110,7 @@ jobs:
           gcc --version
      
     - name: Install dependencies on macos
-      if: startsWith(matrix.config.os, 'macos')
+      if: startsWith(matrix.os, 'macos')
       run: |
           brew install p7zip ninja
           ninja --version
