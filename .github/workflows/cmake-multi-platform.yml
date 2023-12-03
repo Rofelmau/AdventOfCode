@@ -125,6 +125,8 @@ jobs:
             -S . \
             -B . \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
+            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
             -G "Ninja" \
             -DCMAKE_INSTALL_PREFIX:PATH=instdir
     
@@ -141,13 +143,13 @@ jobs:
       working-directory: instdir
       run: |
           ls -laR
-          7z a ../${{ matrix.os }} .
+          7z a ../${{ matrix.os }}.7z .
       
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
-        path: ./${{ matrix.os }}
-        name: ${{ matrix.os }}
+        path: ./${{ matrix.os }}.7z
+        name: ${{ matrix.os }}.7z
 
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
