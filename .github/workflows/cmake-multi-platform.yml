@@ -109,35 +109,32 @@ jobs:
           brew install p7zip ninja
           ninja --version
           cmake --version
-
+          
     - name: Configure
       shell: bash
       run: |
-          mkdir build
-          mkdir instdir
           cmake \
-            -S . \
-            -B . \
+            -S ${{ github.workspace }} \
+            -B ${{ steps.strings.outputs.build-output-dir }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
-            -G "Ninja" \
-            -DCMAKE_INSTALL_PREFIX:PATH=instdir
-    
+            -G "Ninja" 
+            
     - name: Build
       shell: bash
-      run: cmake --build . --config ${{ matrix.build_type }}
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
     
     - name: Install Strip
       shell: bash
-      run: cmake --install . --strip
+      run: cmake --install ${{ steps.strings.outputs.build-output-dir }} --strip
     
     - name: Pack
       shell: bash
       working-directory: instdir
       run: |
           ls -laR
-          7z a ../${{ matrix.os }}.7z .
+          7z a ../${{ matrix.os }}.7z ${{ steps.strings.outputs.build-output-dir }}
       
     - name: Upload
       uses: actions/upload-artifact@v3
