@@ -65,7 +65,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'windows'
         target: 'desktop'
-        arch: 'win64_msvc2019_64'
+        arch: 'win64_mingw'
 
     - name: Install Qt For Ubuntu
       if: startsWith(matrix.os, 'ubuntu')
@@ -111,18 +111,16 @@ jobs:
           cmake --version
           
     - name: Configure
-      shell: bash
-      run: |
-          cmake \
-            -S ${{ github.workspace }} \
-            -B ${{ steps.strings.outputs.build-output-dir }} \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
-            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
-            -G "Ninja" 
+      run: >
+        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -S ${{ github.workspace }}
+        -G "Ninja"
             
     - name: Build
-      shell: bash
+      # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
     
     - name: Install Strip
@@ -131,7 +129,6 @@ jobs:
     
     - name: Pack
       shell: bash
-      working-directory: instdir
       run: |
           ls -laR
           7z a ../${{ matrix.os }}.7z ${{ steps.strings.outputs.build-output-dir }}
