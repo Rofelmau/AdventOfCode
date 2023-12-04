@@ -125,16 +125,9 @@ jobs:
     
     - name: Install Strip
       run: cmake --install ${{ steps.strings.outputs.build-output-dir }} --strip
-    
-    #- name: Pack
-    #  run: |
-    #      7z a ${{ matrix.os }}.7z ${{ steps.strings.outputs.build-output-dir }}
-      
-    #- name: Upload
-    #  uses: actions/upload-artifact@v3
-    #  with:
-    #    path: ./${{ matrix.os }}.7z
-    #    name: ${{ matrix.os }}.7z
+
+    #- name: Deploy Qt
+    #  run: make deployqt
 
     - uses: actions/upload-artifact@v3
       with:
