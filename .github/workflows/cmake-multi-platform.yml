@@ -126,15 +126,27 @@ jobs:
     - name: Install Strip
       run: cmake --install ${{ steps.strings.outputs.build-output-dir }} --strip
     
-    - name: Pack
-      run: |
-          7z a ${{ matrix.os }}.7z ${{ steps.strings.outputs.build-output-dir }}
+    #- name: Pack
+    #  run: |
+    #      7z a ${{ matrix.os }}.7z ${{ steps.strings.outputs.build-output-dir }}
       
-    - name: Upload
-      uses: actions/upload-artifact@v3
+    #- name: Upload
+    #  uses: actions/upload-artifact@v3
+    #  with:
+    #    path: ./${{ matrix.os }}.7z
+    #    name: ${{ matrix.os }}.7z
+
+    - uses: actions/upload-artifact@v3
       with:
-        path: ./${{ matrix.os }}.7z
-        name: ${{ matrix.os }}.7z
+        name: ${{ matrix.os }}
+        path: |
+            ${{ steps.strings.outputs.build-output-dir }}
+            !**/*.cmake
+            !**/*.ninja*
+            !**/CMakeCache.txt
+            !**/install_manifest.txt
+            !**/CMakeFiles/
+            !**/*_autogen/
 
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
