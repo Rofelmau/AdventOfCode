@@ -128,7 +128,6 @@ jobs:
     
     - name: Pack
       run: |
-          ls -laR
           7z a ${{ matrix.os }}.7z ${{ steps.strings.outputs.build-output-dir }}
       
     - name: Upload
